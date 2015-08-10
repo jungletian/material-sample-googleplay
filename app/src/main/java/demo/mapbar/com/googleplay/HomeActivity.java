@@ -1,5 +1,6 @@
 package demo.mapbar.com.googleplay;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -14,17 +15,34 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.StringRequest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import demo.mapbar.com.googleplay.fragment.CheeseListFragment;
 
 public class HomeActivity extends AppCompatActivity {
+    public static final String WEATHER_REQUEST = "weather_request";
+
+    public static final String IMAGE_REQUEST = "image_request";
     @InjectView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout; // 抽屉
 
@@ -63,6 +81,104 @@ public class HomeActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+        volleyGetRequest();
+
+        volleyPostRequest();
+
+        volleyImageRequest();
+
+//        volleyImageLoader();
+
+//        volleyNetworkImageView();
+    }
+
+    private void volleyNetworkImageView(int errorImage, int defaultImage, int id) {
+
+
+        NetworkImageView networkImageView = (NetworkImageView) findViewById(id);
+        String url = "https://www.baidu.com/img/bdlogo.png";
+        ImageLoader imageLoader = new ImageLoader(GpApplication.getRequestQueue(),new BitmapCache());
+
+        networkImageView.setDefaultImageResId(defaultImage);
+        networkImageView.setErrorImageResId(errorImage);
+        networkImageView.setImageUrl(url,imageLoader);
+
+    }
+
+    private void volleyImageLoader(ImageView imageView, int successId, int failureId) {
+        String url = "https://www.baidu.com/img/bdlogo.png";
+        ImageLoader imageLoader = new ImageLoader(GpApplication.getRequestQueue(),new BitmapCache());
+        ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, successId, failureId);
+        imageLoader.get(url,listener);
+    }
+
+
+    private void volleyImageRequest() {
+        GpApplication.getRequestQueue().cancelAll(IMAGE_REQUEST);
+        String url = "https://www.baidu.com/img/bdlogo.png";
+        int maxHeight = 100;
+        int maxWidth = 100;
+        ImageRequest imageRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap bitmap) {
+
+            }
+        }, maxWidth, maxHeight, Bitmap.Config.RGB_565, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        });
+        imageRequest.setTag(IMAGE_REQUEST);
+        GpApplication.getRequestQueue().add(imageRequest);
+    }
+
+    private void volleyPostRequest() {
+        String url = "http://www.weather.com.cn/adat/cityinfo/101010100.html";
+        StringRequest request = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Toast.makeText(HomeActivity.this, "s : " + s, Toast.LENGTH_SHORT).show();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        }){
+            // post request invoke this
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                Map<String,String> hashMap = new HashMap<>();
+                hashMap.put("key","101010100");
+                return hashMap;
+            }
+        };
+        request.setTag(WEATHER_REQUEST);
+
+        GpApplication.getRequestQueue().add(request);
+
+    }
+
+    private void volleyGetRequest() {
+        String url = "http://www.weather.com.cn/adat/cityinfo/101010100.html";
+        StringRequest request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Toast.makeText(HomeActivity.this, "s : " + s, Toast.LENGTH_SHORT).show();
+                Log.d("ZTJ",s);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        });
+        request.setTag("weather_request");
+
+        GpApplication.getRequestQueue().add(request);
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -126,4 +242,10 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onStop() {
+        // activity life-cycle together
+        GpApplication.getRequestQueue().cancelAll(WEATHER_REQUEST);
+        super.onStop();
+    }
 }
