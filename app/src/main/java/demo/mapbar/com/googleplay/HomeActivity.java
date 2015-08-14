@@ -93,9 +93,13 @@ public class HomeActivity extends AppCompatActivity {
 //        volleyNetworkImageView();
     }
 
+    /**
+     * volley网络请求图片
+     * @param errorImage
+     * @param defaultImage
+     * @param id
+     */
     private void volleyNetworkImageView(int errorImage, int defaultImage, int id) {
-
-
         NetworkImageView networkImageView = (NetworkImageView) findViewById(id);
         String url = "https://www.baidu.com/img/bdlogo.png";
         ImageLoader imageLoader = new ImageLoader(GpApplication.getRequestQueue(),new BitmapCache());
@@ -106,6 +110,12 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * volley的图片加载
+     * @param imageView
+     * @param successId
+     * @param failureId
+     */
     private void volleyImageLoader(ImageView imageView, int successId, int failureId) {
         String url = "https://www.baidu.com/img/bdlogo.png";
         ImageLoader imageLoader = new ImageLoader(GpApplication.getRequestQueue(),new BitmapCache());
@@ -114,6 +124,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * volley的请求图片
+     */
     private void volleyImageRequest() {
         GpApplication.getRequestQueue().cancelAll(IMAGE_REQUEST);
         String url = "https://www.baidu.com/img/bdlogo.png";
@@ -134,6 +147,9 @@ public class HomeActivity extends AppCompatActivity {
         GpApplication.getRequestQueue().add(imageRequest);
     }
 
+    /**
+     * volley的post请求
+     */
     private void volleyPostRequest() {
         String url = "http://www.weather.com.cn/adat/cityinfo/101010100.html";
         StringRequest request = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
@@ -162,6 +178,9 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * volley的get请求
+     */
     private void volleyGetRequest() {
         String url = "http://www.weather.com.cn/adat/cityinfo/101010100.html";
         StringRequest request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -181,6 +200,10 @@ public class HomeActivity extends AppCompatActivity {
         GpApplication.getRequestQueue().add(request);
     }
 
+    /**
+     * 设置ViewPager
+     * @param viewPager
+     */
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getSupportFragmentManager());
         adapter.addFragment(new CheeseListFragment(), "Category 1");
